@@ -9,7 +9,7 @@ import { useRef } from "react";
 import { formatBytes } from "../../shared/utils";
 import { createPeer } from "../../webrtc/createPeer";
 
-const WS_URL = "ws://localhost:3001";
+const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:3001";
 
 const DownloadPage = () => {
   const { roomId } = useParams();

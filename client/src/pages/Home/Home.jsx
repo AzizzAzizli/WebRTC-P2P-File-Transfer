@@ -6,7 +6,7 @@ import ProgressBar from "../../components/Progress/ProgressBar";
 import { toast } from "react-toastify";
 import { createPeer } from "../../webrtc/createPeer";
 const CHUNK_SIZE = 16384;
-const WS_URL = "ws://localhost:3001";
+const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:3001";
 const Home = () => {
   const [file, setFile] = useState(null);
   const [link, setLink] = useState("");
