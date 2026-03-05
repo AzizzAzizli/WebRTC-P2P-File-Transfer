@@ -51,7 +51,7 @@ const Downloadbox = ({ file, setFile, link, handleCreateLink, setStatus }) => {
           <button
             type="button"
             onClick={handleCreateLink}
-            className="mt-2 w-full rounded-2xl bg-cyan-500 hover:bg-cyan-600 px-4 py-2 text-sm font-semibold text-white transition"
+            className="mt-2 w-full cursor-pointer rounded-2xl bg-cyan-500 hover:bg-cyan-600 px-4 py-2 text-sm font-semibold text-white transition"
           >
             Create Link
           </button>
