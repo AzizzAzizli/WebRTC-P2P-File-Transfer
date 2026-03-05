@@ -1,7 +1,6 @@
 import { WebSocketServer } from "ws";
 import { randomUUID } from "crypto";
 import { createServer } from "http";
-import { json } from "stream/consumers";
 const server = createServer();
 const wss = new WebSocketServer({ server });
 const rooms = new Map();
@@ -13,12 +12,15 @@ wss.on("connection", (ws) => {
     switch (data.type) {
       case "create-room": {
         const roomId = randomUUID();
+        // console.log(roomId);
+
         rooms.set(roomId, {
           sender: ws,
           receiver: null,
           fileName: data.fileName,
           fileSize: data.fileSize,
         });
+
         ws.roomId = roomId;
         ws.role = "sender";
         ws.send(JSON.stringify({ type: "room-created", roomId }));
@@ -28,8 +30,9 @@ wss.on("connection", (ws) => {
       }
       case "join-room": {
         const room = rooms.get(data.roomId);
+
         if (!room) {
-          ws.send(JSON.stringify({ type: "error", message: "Room not found" }));
+          ws.send(JSON.stringify({ type: "error", message: "Room not found jo" }));
           return;
         }
         if (room.receiver) {
@@ -47,18 +50,19 @@ wss.on("connection", (ws) => {
 
         ws.send(
           JSON.stringify({
-            type: "Joined-room",
+            type: "room-joined",
             fileName: room.fileName,
             fileSize: room.fileSize,
           }),
         );
-
+        room.sender.send(JSON.stringify({ type: "receiver-joined" }));
         break;
       }
       case "request-file": {
         const room = rooms.get(data.roomId);
         if (!room) {
-          ws.send(JSON.stringify({ type: "error", message: "Room not found" }));
+          // console.log("room",!!room);
+          ws.send(JSON.stringify({ type: "error", message: "Room not found req" }));
           return;
         }
         room.sender.send(JSON.stringify({ type: "file-requested" }));
@@ -67,9 +71,10 @@ wss.on("connection", (ws) => {
       case "offer":
       case "answer":
       case "ice-candidate": {
-        const room = rooms.get(data.roomId);
+        const roomId = ws.roomId
+        const room = rooms.get(roomId);
         if (!room) {
-          ws.send(JSON.stringify({ type: "error", message: "Room not found" }));
+          ws.send(JSON.stringify({ type: "error", message: "Room not found of" }));
           return;
         }
         const target = ws.role === "sender" ? room.receiver : room.sender;
