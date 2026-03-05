@@ -4,7 +4,7 @@ import Status from "../../components/Status/Status";
 import { useEffect, useRef, useState } from "react";
 import ProgressBar from "../../components/Progress/ProgressBar";
 import { toast } from "react-toastify";
-const pcConfig = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
+import { createPeer } from "../../webrtc/createPeer";
 const CHUNK_SIZE = 16384;
 const WS_URL = "ws://localhost:3001";
 const Home = () => {
@@ -51,7 +51,6 @@ const Home = () => {
 
       ws.current.onmessage = async (e) => {
         const msg = JSON.parse(e.data);
-        console.log(msg);
         if (msg.type === "room-created") {
           const createdLink = `${window.location.origin}/download/${msg.roomId}`;
           setLink(createdLink);
@@ -79,12 +78,12 @@ const Home = () => {
         }
       };
     } catch (err) {
-      console.log(err);
+      // console.log(err);
     }
   }
 
   async function peerConnection() {
-    pc.current = new RTCPeerConnection(pcConfig);
+    pc.current = createPeer();
     dc.current = pc.current.createDataChannel("file");
     dc.current.binaryType = "arraybuffer";
     dc.current.onopen = () => {
@@ -99,7 +98,6 @@ const Home = () => {
     };
     const offer = await pc.current.createOffer();
     await pc.current.setLocalDescription(offer);
-    console.log(offer);
     setStatus("offer-sent");
     ws.current.send(JSON.stringify({ type: "offer", sdp: offer }));
   }

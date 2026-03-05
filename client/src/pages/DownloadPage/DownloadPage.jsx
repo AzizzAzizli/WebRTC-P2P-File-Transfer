@@ -7,9 +7,9 @@ import { toast } from "react-toastify";
 import { useEffect } from "react";
 import { useRef } from "react";
 import { formatBytes } from "../../shared/utils";
+import { createPeer } from "../../webrtc/createPeer";
 
 const WS_URL = "ws://localhost:3001";
-const PC_CONFIG = { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] };
 
 const DownloadPage = () => {
   const { roomId } = useParams();
@@ -54,20 +54,16 @@ const DownloadPage = () => {
       }
       if (msg.type === "peer-disconnected") {
         setStatus("error");
-        console.log(msg.message);
       }
       if (msg.type === "error") {
         setStatus("error");
-        console.log(msg.message);
       }
-      console.log(msg);
     };
   }
   async function setupPeerConnection(sdpOffer) {
     try {
-      pc.current = new RTCPeerConnection(PC_CONFIG);
+      pc.current = createPeer();
       pc.current.ondatachannel = (e) => {
-        console.log(e);
 
         const channel = e.channel;
         channel.binaryType = "arraybuffer";
@@ -75,7 +71,6 @@ const DownloadPage = () => {
           setStatus("awaiting-data");
         };
         channel.onmessage = (e) => {
-          console.log(e.data);
           setStatus("receiving");
 
           receivedChunks.current.push(e.data);
@@ -107,7 +102,7 @@ const DownloadPage = () => {
       setStatus("answering-peer");
       ws.current.send(JSON.stringify({ type: "answer", sdp: answer }));
     } catch (err) {
-      console.log(err);
+      // console.log(err);
     }
   }
 
