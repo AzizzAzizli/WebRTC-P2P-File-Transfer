@@ -1,6 +1,6 @@
+import { formatBytes } from "../../shared/utils";
 
-const Receive = ({ fileName, fileSize, url }) => {
-  const safeName = fileName || "unknown-file";
+const Receive = ({ file ,url }) => {
 
   return (
     <div className="h-[260px] w-full max-w-[260px] rounded-3xl bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 p-6 shadow-[0_0_35px_rgba(15,23,42,0.9)] ring-1 ring-cyan-500/30 sm:max-w-[280px] md:max-w-[320px]">
@@ -17,18 +17,18 @@ const Receive = ({ fileName, fileSize, url }) => {
         <div className="space-y-1">
           <p
             className="truncate text-base font-semibold text-[#F4F9E9]"
-            title={fileName || "unknown file"}
+            title={file?.name || "unknown file"}
           >
-            {fileName || "unknown file"}
+            {file?.name || "unknown file"}
           </p>
           <p className="text-sm text-[#EEF0EB]/80">
-            {fileSize ? `${fileSize} bytes` : "unknown size"}
+            {file.size ? `${formatBytes(file?.size)} bytes` : "unknown size"}
           </p>
         </div>
         <div>
           <a
             href={url}
-            download={safeName}
+            download={file?.name || "unknown_file"}
             className="flex items-center justify-center gap-2 rounded-2xl bg-[#F4F9E9] px-4 py-2 text-sm font-semibold text-[#284B63] shadow-sm transition hover:-translate-y-[1px] hover:bg-white hover:shadow-md"
           >
             Download

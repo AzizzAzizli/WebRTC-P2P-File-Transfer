@@ -1,8 +1,10 @@
 import { toast } from "react-toastify";
+import { formatBytes } from "../../shared/utils";
 
-const Downloadbox = ({ file, setFile, link }) => {
+const Downloadbox = ({ file, setFile, link, handleCreateLink, setStatus }) => {
   function handleClose() {
     setFile(null);
+    setStatus("");
   }
 
   async function copyLink() {
@@ -42,32 +44,40 @@ const Downloadbox = ({ file, setFile, link }) => {
           >
             {file.name}
           </p>
-          <p className="text-sm text-[#EEF0EB]/80">
-            {(file.size / (1024 * 1024)).toFixed(2)} MB
-          </p>
+          <p className="text-sm text-[#EEF0EB]/80">{formatBytes(file.size)}</p>
         </div>
 
-        <div className="space-y-2">
-          <label className="text-xs font-medium uppercase tracking-[0.18em] text-[#EEF0EB]/60">
-            Share link
-          </label>
-          <div className="flex items-center gap-2 rounded-2xl bg-[#153243]/60 px-3 py-2">
-            <input
-              className="flex-1 bg-transparent text-xs font-medium text-[#EEF0EB] outline-none placeholder:text-[#EEF0EB]/50"
-              value={link}
-              readOnly
-              type="text"
-              placeholder="Preparing link..."
-            />
-            <button
-              type="button"
-              onClick={copyLink}
-              className="shrink-0 rounded-full bg-[#FDE68A] px-3 py-1 text-xs font-semibold text-[#0F172A] transition hover:bg-[#FACC15]"
-            >
-              Copy
-            </button>
+        {!link ? (
+          <button
+            type="button"
+            onClick={handleCreateLink}
+            className="mt-2 w-full rounded-2xl bg-cyan-500 hover:bg-cyan-600 px-4 py-2 text-sm font-semibold text-white transition"
+          >
+            Create Link
+          </button>
+        ) : (
+          <div className="space-y-2">
+            <label className="text-xs font-medium uppercase tracking-[0.18em] text-[#EEF0EB]/60">
+              Share link
+            </label>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2 rounded-2xl bg-[#153243]/60 px-3 py-2">
+              <input
+                className="flex-1 bg-transparent text-xs font-medium text-[#EEF0EB] outline-none placeholder:text-[#EEF0EB]/50"
+                value={link}
+                readOnly
+                type="text"
+                placeholder="Preparing link..."
+              />
+              <button
+                type="button"
+                onClick={copyLink}
+                className="shrink-0 rounded-full bg-[#FDE68A] px-3 py-1 text-xs font-semibold text-[#0F172A] transition hover:bg-[#FACC15] sm:w-auto"
+              >
+                Copy
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

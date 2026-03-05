@@ -9,7 +9,7 @@ const ProgressBar = ({ value = 0, label, className = "" }) => {
   const safeValue = clamp(value);
 
   return (
-    <div className={`space-y-1 w-1/2 ${className}`}>
+    <div className={`space-y-1 w-full ${className}`}>
       {label && (
         <div className="flex items-center justify-between text-xs font-mono uppercase tracking-[0.18em] text-slate-400">
           <span>{label}</span>

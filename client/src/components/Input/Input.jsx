@@ -1,18 +1,12 @@
 import React, { useRef } from "react";
 
-const Input = ({ setFile, start }) => {
+const Input = ({ handleFile }) => {
   const inputRef = useRef(null);
 
   function activateInput() {
     inputRef.current?.click();
   }
 
-  function handleFileChange(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    setFile(file);
-    start(file);
-  }
 
   return (
     <button
@@ -34,7 +28,7 @@ const Input = ({ setFile, start }) => {
         </div>
       </div>
       <input
-        onChange={handleFileChange}
+        onChange={handleFile}
         ref={inputRef}
         className="hidden"
         type="file"
