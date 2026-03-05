@@ -97,4 +97,4 @@ wss.on("connection", (ws) => {
   ws.on("error", (err) => console.error("WS hata:", err.message));
 });
 
-server.listen(3001, () => console.log("server running"));
+server.listen(process.env.PORT || 3001);
