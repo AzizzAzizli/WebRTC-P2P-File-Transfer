@@ -2,6 +2,7 @@ import "./App.css";
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home/Home";
 import DownloadPage from "./pages/DownloadPage/DownloadPage";
+import NotFound from "./pages/NotFound/NotFound";
 import Header from "./components/Header/Header";
 import { ToastContainer } from "react-toastify";
 
@@ -14,6 +15,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/download/:roomId" element={<DownloadPage />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
     </div>
