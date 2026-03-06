@@ -1,9 +1,22 @@
 import { WebSocketServer } from "ws";
 import { randomUUID } from "crypto";
 import { createServer } from "http";
-const server = createServer();
+
+const server = createServer((req, res) => {
+  if (req.method === "GET" && req.url === "/cronjob") {
+
+    res.writeHead(200, { "Content-Type": "text/plain" });
+    res.end("OK");
+    return;
+  }
+  res.writeHead(404);
+  res.end();
+});
+
 const wss = new WebSocketServer({ server });
 const rooms = new Map();
+
+
 
 wss.on("connection", (ws) => {
   ws.on("message", (msg) => {
