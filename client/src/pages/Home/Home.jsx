@@ -107,7 +107,7 @@ const Home = () => {
     pc.current = createPeer();
     dc.current = pc.current.createDataChannel("file", {
       ordered: true,
-      maxRetransmits: 0,
+      // maxRetransmits: 0,
     });
     dc.current.binaryType = "arraybuffer";
     dc.current.onopen = () => {

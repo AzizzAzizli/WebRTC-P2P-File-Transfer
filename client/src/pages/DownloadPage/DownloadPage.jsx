@@ -17,7 +17,7 @@ const DownloadPage = () => {
   const [progress, setProgress] = useState(0);
   const [fileInfo, setFileInfo] = useState(null);
   const [downloadUrl, setDownloadUrl] = useState("");
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(true);
 
   const ws = useRef(null);
   const pc = useRef(null);
@@ -65,7 +65,6 @@ const DownloadPage = () => {
     try {
       pc.current = createPeer();
       pc.current.ondatachannel = (e) => {
-
         const channel = e.channel;
         channel.binaryType = "arraybuffer";
         channel.onopen = () => {
@@ -108,20 +107,12 @@ const DownloadPage = () => {
   }
 
   function requestFile() {
-    // disable button and show spinner immediately
-    setIsLoading(true);
     ws.current.send(JSON.stringify({ type: "request-file", roomId }));
     setStatus("waiting-offer");
   }
 
-  // clear loading when we reach awaiting-data or beyond
   useEffect(() => {
-    if (
-      status === "awaiting-data" ||
-      status === "receiving" ||
-      status === "done" ||
-      status === "error"
-    ) {
+    if (status === "awaiting-data") {
       setIsLoading(false);
     }
   }, [status]);
@@ -145,7 +136,7 @@ const DownloadPage = () => {
             </div>
           )}
         </div>
-        <div className="flex w-full flex-1 flex-col gap-4 text-slate-100">
+        <div className="flex w-full flex-1 md:flex-col flex-col-reverse gap-4 text-slate-100">
           <div className="space-y-3">
             <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">
               Receive files securely, in real time.
@@ -192,7 +183,6 @@ const DownloadPage = () => {
               }`}
             >
               {isLoading ? (
-                // simple spinner SVG
                 <svg
                   className="h-5 w-5 animate-spin text-white"
                   xmlns="http://www.w3.org/2000/svg"
