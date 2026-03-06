@@ -38,7 +38,6 @@ const Home = () => {
     setStatus("");
     setLink("");
     setProgress(0);
-    setFile(null);
   }
   useEffect(() => {
     if (!file) return;
