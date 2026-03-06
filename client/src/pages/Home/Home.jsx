@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import ProgressBar from "../../components/Progress/ProgressBar";
 import { toast } from "react-toastify";
 import { createPeer } from "../../webrtc/createPeer";
-const CHUNK_SIZE = 16384;
+const CHUNK_SIZE = 64 * 1024;
 const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:3001";
 const Home = () => {
   const [file, setFile] = useState(null);
@@ -102,24 +102,60 @@ const Home = () => {
     ws.current.send(JSON.stringify({ type: "offer", sdp: offer }));
   }
 
+  //Old
+  // function sendFile() {
+  //   const reader = new FileReader();
+  //   let offset = 0;
+  //   reader.onload = (e) => {
+  //     if (dc.current.bufferedAmount > CHUNK_SIZE * 4) {
+  //       setTimeout(() => reader.onload(e), 50);
+  //       return;
+  //     }
+  //     dc.current.send(e.target.result);
+  //     offset += e.target.result.byteLength;
+  //     setProgress(Math.floor((offset / file.size) * 100));
+  //     if (offset < file.size) {
+  //       readSlice(offset);
+  //     } else {
+  //       setStatus("done");
+  //       ws.current.close();
+  //     }
+  //   };
+  //   function readSlice(o) {
+  //     const slice = file.slice(o, o + CHUNK_SIZE);
+  //     reader.readAsArrayBuffer(slice);
+  //   }
+
+  //   readSlice(0);
+  // }
+  // New
   function sendFile() {
     const reader = new FileReader();
     let offset = 0;
+
+    dc.current.bufferedAmountLowThreshold = CHUNK_SIZE * 2;
+
     reader.onload = (e) => {
-      if (dc.current.bufferedAmount > CHUNK_SIZE * 4) {
-        setTimeout(() => reader.onload(e), 50);
-        return;
-      }
       dc.current.send(e.target.result);
+
       offset += e.target.result.byteLength;
+
       setProgress(Math.floor((offset / file.size) * 100));
+
       if (offset < file.size) {
-        readSlice(offset);
+        if (dc.current.bufferedAmount > CHUNK_SIZE * 4) {
+          dc.current.onbufferedamountlow = () => {
+            dc.current.onbufferedamountlow = null;
+            readSlice(offset);
+          };
+        } else {
+          readSlice(offset);
+        }
       } else {
         setStatus("done");
-        ws.current.close();
       }
     };
+
     function readSlice(o) {
       const slice = file.slice(o, o + CHUNK_SIZE);
       reader.readAsArrayBuffer(slice);
