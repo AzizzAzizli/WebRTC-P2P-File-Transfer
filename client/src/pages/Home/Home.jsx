@@ -2,6 +2,7 @@ import Input from "../../components/Input/Input";
 import Downloadbox from "../../components/Downloadbox/Downloadbox";
 import Status from "../../components/Status/Status";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ProgressBar from "../../components/Progress/ProgressBar";
 import { toast } from "react-toastify";
 import { createPeer } from "../../webrtc/createPeer";
@@ -16,6 +17,7 @@ const Home = () => {
   const pc = useRef(null);
   const dc = useRef(null);
   const ws = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     return () => {
@@ -24,9 +26,7 @@ const Home = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (!file) return;
-
+  function reset() {
     ws.current?.close();
     pc.current?.close();
     dc.current?.close?.();
@@ -38,6 +38,11 @@ const Home = () => {
     setStatus("");
     setLink("");
     setProgress(0);
+    setFile(null);
+  }
+  useEffect(() => {
+    if (!file) return;
+    reset();
   }, [file]);
 
   function handleFileChange(e) {
@@ -105,6 +110,14 @@ const Home = () => {
       pc.current.close();
     }
     pc.current = createPeer();
+    pc.current.oniceconnectionstatechange = () => {
+      const st = pc.current.iceConnectionState;
+      console.log("ICE state:", st);
+      if ((st === "failed" || st === "disconnected") && status !== "done") {
+        toast.error("Unable to establish peer connection.");
+        reset()
+      }
+    };
     dc.current = pc.current.createDataChannel("file", {
       ordered: true,
       // maxRetransmits: 0,
@@ -218,7 +231,7 @@ const Home = () => {
               on a server.
             </p>
           </div>
-          {(progress > 0 && status) && (
+          {progress > 0 && status && (
             <div className="rounded-2xl bg-slate-900/80 p-4">
               <ProgressBar value={progress} label="Transfer Progress" />
             </div>

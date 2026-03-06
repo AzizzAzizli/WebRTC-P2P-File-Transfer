@@ -2,7 +2,7 @@ import { useState } from "react";
 import Receive from "../../components/ReceiveBox/Receive";
 import Status from "../../components/Status/Status";
 import ProgressBar from "../../components/Progress/ProgressBar";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useEffect } from "react";
 import { useRef } from "react";
@@ -13,6 +13,7 @@ const WS_URL = import.meta.env.VITE_WS_URL || "ws://localhost:3001";
 
 const DownloadPage = () => {
   const { roomId } = useParams();
+  const navigate = useNavigate();
   const [status, setStatus] = useState("connecting");
   const [progress, setProgress] = useState(0);
   const [fileInfo, setFileInfo] = useState(null);
@@ -64,6 +65,14 @@ const DownloadPage = () => {
   async function setupPeerConnection(sdpOffer) {
     try {
       pc.current = createPeer();
+      pc.current.oniceconnectionstatechange = () => {
+        const state = pc.current.iceConnectionState;
+        console.log("ICE state:", state);
+        if ((state === "failed" || state === "disconnected") && status !== "done") {
+          toast.error("Unable to establish peer connection.");
+          setTimeout(() => navigate("/"), 1000);
+        }
+      };
       pc.current.ondatachannel = (e) => {
         const channel = e.channel;
         channel.binaryType = "arraybuffer";
