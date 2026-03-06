@@ -50,7 +50,9 @@ const Status = ({ status }) => {
                               : "bg-gray-500"
         }`}
       ></span>
-      <p className="text-xs font-medium text-cyan-300">{getMessage(status)}</p>
+      <p className="text-xs font-medium text-cyan-300 whitespace-nowrap">
+        {getMessage(status)}
+      </p>
     </div>
   );
 };

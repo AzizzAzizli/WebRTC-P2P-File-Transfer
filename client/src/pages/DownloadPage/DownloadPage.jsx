@@ -115,7 +115,7 @@ const DownloadPage = () => {
     <div className="flex min-h-[calc(100vh-80px)] w-full items-center justify-center px-4 pb-10 pt-6">
       <div className="relative mx-auto flex w-full max-w-6xl flex-col items-center gap-10 rounded-3xl border border-cyan-500/15 bg-slate-950/80 p-6 shadow-[0_0_50px_rgba(15,23,42,0.9)] backdrop-blur-xl md:flex-row md:items-stretch md:gap-14 md:p-10">
         {status && <Status status={status} />}
-        <div className="flex w-full justify-center items-center md:w-1/2">
+        <div className="flex w-full justify-center items-center mt-12 md:mt-0 md:w-1/2">
           {downloadUrl ? (
             <Receive file={fileInfo} url={downloadUrl} />
           ) : (
