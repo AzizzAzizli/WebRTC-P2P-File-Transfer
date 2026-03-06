@@ -83,12 +83,6 @@ const Home = () => {
           await pc.current.setRemoteDescription(
             new RTCSessionDescription(msg.sdp),
           );
-          // add candidates from answer
-          if (msg.candidates) {
-            for (const candidate of msg.candidates) {
-              pc.current.addIceCandidate(new RTCIceCandidate(candidate));
-            }
-          }
         }
         if (msg.type === "ice-candidate") {
           await pc.current.addIceCandidate(new RTCIceCandidate(msg.candidate));
@@ -113,31 +107,23 @@ const Home = () => {
     pc.current = createPeer();
     dc.current = pc.current.createDataChannel("file", {
       ordered: true,
+      // maxRetransmits: 0,
     });
     dc.current.binaryType = "arraybuffer";
     dc.current.onopen = () => {
       setStatus("connected");
     };
-
-    const iceCandidates = [];
-    pc.current.onicecandidate = (e) => {
+    pc.current.onicecandidate = async (e) => {
       if (e.candidate) {
-        iceCandidates.push(e.candidate);
-        // still trickle candidates
         ws.current.send(
           JSON.stringify({ type: "ice-candidate", candidate: e.candidate }),
         );
       }
     };
-
     const offer = await pc.current.createOffer();
     await pc.current.setLocalDescription(offer);
-
     setStatus("offer-sent");
-    // send offer with candidates gathered so far
-    ws.current.send(
-      JSON.stringify({ type: "offer", sdp: offer, candidates: iceCandidates }),
-    );
+    ws.current.send(JSON.stringify({ type: "offer", sdp: offer }));
   }
 
   //Old
@@ -232,7 +218,7 @@ const Home = () => {
               on a server.
             </p>
           </div>
-          {progress > 0 && status && (
+          {(progress > 0 && status) && (
             <div className="rounded-2xl bg-slate-900/80 p-4">
               <ProgressBar value={progress} label="Transfer Progress" />
             </div>

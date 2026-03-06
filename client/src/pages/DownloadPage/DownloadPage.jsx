@@ -49,12 +49,6 @@ const DownloadPage = () => {
       if (msg.type === "offer") {
         setStatus("connecting-peer");
         await setupPeerConnection(msg.sdp);
-        // add candidates from offer
-        if (msg.candidates) {
-          for (const candidate of msg.candidates) {
-            pc.current.addIceCandidate(new RTCIceCandidate(candidate));
-          }
-        }
       }
       if (msg.type === "ice-candidate") {
         await pc.current.addIceCandidate(new RTCIceCandidate(msg.candidate));
@@ -93,31 +87,20 @@ const DownloadPage = () => {
           }
         };
       };
-
-      const iceCandidates = [];
       pc.current.onicecandidate = (e) => {
         if (e.candidate) {
-          iceCandidates.push(e.candidate);
           ws.current.send(
             JSON.stringify({ type: "ice-candidate", candidate: e.candidate }),
           );
         }
       };
-
       await pc.current.setRemoteDescription(
         new RTCSessionDescription(sdpOffer),
       );
       const answer = await pc.current.createAnswer();
       await pc.current.setLocalDescription(answer);
       setStatus("answering-peer");
-
-      ws.current.send(
-        JSON.stringify({
-          type: "answer",
-          sdp: answer,
-          candidates: iceCandidates,
-        }),
-      );
+      ws.current.send(JSON.stringify({ type: "answer", sdp: answer }));
     } catch (err) {
       // console.log(err);
     }
