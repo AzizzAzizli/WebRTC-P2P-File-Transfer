@@ -45,7 +45,7 @@ wss.on("connection", (ws) => {
         const room = rooms.get(data.roomId);
 
         if (!room) {
-          ws.send(JSON.stringify({ type: "error", message: "Room not found jo" }));
+          ws.send(JSON.stringify({ type: "error", message: "Room not found" }));
           return;
         }
         if (room.receiver) {
@@ -75,7 +75,7 @@ wss.on("connection", (ws) => {
         const room = rooms.get(data.roomId);
         if (!room) {
           // console.log("room",!!room);
-          ws.send(JSON.stringify({ type: "error", message: "Room not found req" }));
+          ws.send(JSON.stringify({ type: "error", message: "Room not found" }));
           return;
         }
         room.sender.send(JSON.stringify({ type: "file-requested" }));
@@ -87,7 +87,7 @@ wss.on("connection", (ws) => {
         const roomId = ws.roomId
         const room = rooms.get(roomId);
         if (!room) {
-          ws.send(JSON.stringify({ type: "error", message: "Room not found of" }));
+          ws.send(JSON.stringify({ type: "error", message: "Room not found" }));
           return;
         }
         const target = ws.role === "sender" ? room.receiver : room.sender;
