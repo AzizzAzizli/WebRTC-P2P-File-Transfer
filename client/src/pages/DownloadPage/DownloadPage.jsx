@@ -17,6 +17,7 @@ const DownloadPage = () => {
   const [progress, setProgress] = useState(0);
   const [fileInfo, setFileInfo] = useState(null);
   const [downloadUrl, setDownloadUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false); 
 
   const ws = useRef(null);
   const pc = useRef(null);
@@ -107,9 +108,23 @@ const DownloadPage = () => {
   }
 
   function requestFile() {
+    // disable button and show spinner immediately
+    setIsLoading(true);
     ws.current.send(JSON.stringify({ type: "request-file", roomId }));
     setStatus("waiting-offer");
   }
+
+  // clear loading when we reach awaiting-data or beyond
+  useEffect(() => {
+    if (
+      status === "awaiting-data" ||
+      status === "receiving" ||
+      status === "done" ||
+      status === "error"
+    ) {
+      setIsLoading(false);
+    }
+  }, [status]);
 
   return (
     <div className="flex min-h-[calc(100vh-80px)] w-full items-center justify-center px-4 pb-10 pt-6">
@@ -169,9 +184,38 @@ const DownloadPage = () => {
             <button
               type="button"
               onClick={requestFile}
-              className="mt-2 inline-flex w-fit items-center justify-center rounded-full bg-[#284B63] px-5 py-2.5 text-sm font-semibold text-[#F4F9E9] shadow-sm transition hover:-translate-y-[1px] hover:bg-[#1f3b4d] hover:shadow-md"
+              disabled={isLoading}
+              className={`mt-2 inline-flex w-fit items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold text-[#F4F9E9] shadow-sm transition hover:-translate-y-[1px] hover:shadow-md ${
+                isLoading
+                  ? "bg-gray-600 cursor-not-allowed hover:bg-gray-600"
+                  : "bg-[#284B63] hover:bg-[#1f3b4d]"
+              }`}
             >
-              Get files
+              {isLoading ? (
+                // simple spinner SVG
+                <svg
+                  className="h-5 w-5 animate-spin text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8H4z"
+                  ></path>
+                </svg>
+              ) : (
+                "Get files"
+              )}
             </button>
           )}
         </div>

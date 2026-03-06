@@ -218,7 +218,7 @@ const Home = () => {
               on a server.
             </p>
           </div>
-          {progress > 0 && (
+          {(progress > 0 && status) && (
             <div className="rounded-2xl bg-slate-900/80 p-4">
               <ProgressBar value={progress} label="Transfer Progress" />
             </div>
