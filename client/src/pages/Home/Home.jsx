@@ -17,6 +17,7 @@ const Home = () => {
   const pc = useRef(null);
   const dc = useRef(null);
   const ws = useRef(null);
+  const candidateQueue = useRef([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -87,9 +88,19 @@ const Home = () => {
           await pc.current.setRemoteDescription(
             new RTCSessionDescription(msg.sdp),
           );
+          while (candidateQueue.current.length > 0) {
+            const candidate = candidateQueue.current.shift();
+            await pc.current.addIceCandidate(new RTCIceCandidate(candidate));
+          }
         }
         if (msg.type === "ice-candidate") {
-          await pc.current.addIceCandidate(new RTCIceCandidate(msg.candidate));
+          if (pc.current && pc.current.remoteDescription) {
+            await pc.current.addIceCandidate(
+              new RTCIceCandidate(msg.candidate),
+            );
+          } else {
+            candidateQueue.current.push(msg.candidate);
+          }
         }
         if (msg.type === "peer-disconnected") {
           setStatus("idle");
@@ -114,7 +125,7 @@ const Home = () => {
       console.log("ICE state:", st);
       if ((st === "failed" || st === "disconnected") && status !== "done") {
         toast.error("Unable to establish peer connection.");
-        reset()
+        reset();
       }
     };
     dc.current = pc.current.createDataChannel("file", {

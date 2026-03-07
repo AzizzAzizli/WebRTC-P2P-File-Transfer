@@ -24,7 +24,7 @@ const DownloadPage = () => {
   const pc = useRef(null);
   const receivedChunks = useRef([]);
   const fileMetadata = useRef(null);
-
+  const candidateQueue = useRef([]);
   useEffect(() => {
     if (status === "error") {
       toast.error("Connection error occurred");
@@ -52,7 +52,11 @@ const DownloadPage = () => {
         await setupPeerConnection(msg.sdp);
       }
       if (msg.type === "ice-candidate") {
-        await pc.current.addIceCandidate(new RTCIceCandidate(msg.candidate));
+        if (pc.current && pc.current.remoteDescription) {
+          await pc.current.addIceCandidate(new RTCIceCandidate(msg.candidate));
+        } else {
+          candidateQueue.current.push(msg.candidate);
+        }
       }
       if (msg.type === "peer-disconnected") {
         setStatus("error");
@@ -68,7 +72,10 @@ const DownloadPage = () => {
       pc.current.oniceconnectionstatechange = () => {
         const state = pc.current.iceConnectionState;
         console.log("ICE state:", state);
-        if ((state === "failed" || state === "disconnected") && status !== "done") {
+        if (
+          (state === "failed" || state === "disconnected") &&
+          status !== "done"
+        ) {
           toast.error("Unable to establish peer connection.");
           setTimeout(() => navigate("/"), 1000);
         }
@@ -106,6 +113,10 @@ const DownloadPage = () => {
       await pc.current.setRemoteDescription(
         new RTCSessionDescription(sdpOffer),
       );
+      while (candidateQueue.current.length > 0) {
+        const candidate = candidateQueue.current.shift();
+        await pc.current.addIceCandidate(new RTCIceCandidate(candidate));
+      }
       const answer = await pc.current.createAnswer();
       await pc.current.setLocalDescription(answer);
       setStatus("answering-peer");
